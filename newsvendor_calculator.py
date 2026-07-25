@@ -59,48 +59,19 @@ if calc:
         st.metric("Monte Carlo Q*", f"{mc_qstar} units")
  
     st.divider()
- 
-    # ── Formula ────────────────────────────────────────────────────────────────
-    st.markdown("## The Math")
+    st.markdown("### Calculating the Critical Ratio and Q* using Known Equations")
     st.markdown(f"""
-$$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {Crit_ratio:.4f}$$
+$$CR = \\frac{{Price - Cost}}{{Price - Salvage}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {Crit_ratio:.4f}$$
  
 $$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(Crit_ratio):.3f} \\times {std} = {Qstar}$$
 """)
  
     st.divider()
- 
-    # ── Plot ───────────────────────────────────────────────────────────────────
-    st.markdown("## Expected Profit vs. Order Quantity")
+    st.markdown("### Monte Carlo Simulation")
  
     fig = go.Figure()
-    fig.add_scatter(
-        x=list(qs),
-        y=myprofit,
-        mode='lines',
-        name='Expected Profit',
-        line=dict(color='steelblue', width=2)
-    )
-    fig.add_vline(
-        x=mc_qstar, line_dash='dash', line_color='red',
-        annotation_text=f'MC Q*={mc_qstar}',
-        annotation_position='top left'
-    )
-    fig.add_vline(
-        x=Qstar, line_dash='dash', line_color='green',
-        annotation_text=f'Analytical Q*={Qstar}',
-        annotation_position='top right'
-    )
-    fig.update_layout(
-        title=f'Expected Profit vs. Order Quantity ({trials:,} trials)',
-        xaxis_title='Order Quantity',
-        yaxis_title='Expected Profit ($)',
-        plot_bgcolor='white',
-        height=450
-    )
-    fig.update_yaxes(gridcolor='#eee', tickprefix='$')
-    fig.update_xaxes(gridcolor='#eee')
-    st.plotly_chart(fig, use_container_width=True)
- 
-    st.success(f"At Q*={mc_qstar}, the Monte Carlo and analytical solutions "
-               f"{'agree.' if mc_qstar == Qstar else f'differ by {abs(mc_qstar - Qstar)} unit(s).'}")
+    fig.add_scatter(x=list(qs),y=myprofit,mode='lines')
+    fig.add_vline(x=mc_qstar, line_dash='dash', line_color='red', annotation_text=f'Simulated Q*={mc_qstar}')
+    fig.update_layout(title=f'Expected Profit vs. Order Quantity over 1,000,000 trials)',xaxis_title='Order Quantity',yaxis_title='Expected Profit ($)')
+
+    st.success(f'The Monte Carlo and analytical solutions differ by {abs(mc_qstar - Qstar)} units.')
