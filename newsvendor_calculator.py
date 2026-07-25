@@ -41,7 +41,7 @@ if calc:
     Qstar=round(norm.ppf(Crit_ratio,mean,std))
    
   #Monte Carlo q star
-    np.random.seed(50)
+    np.random.default_rng(50)
     trials = 1000000
     qs = range(0, 2*int(mean), 1)
     myprofit = []
