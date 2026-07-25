@@ -3,46 +3,43 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import norm
  
-st.set_page_config(page_title="Newsvendor Calculator", layout="centered")
+st.set_page_config(page_title="Newsvendor Problem Calculator", layout="centered")
  
-st.markdown("# 📰 Newsvendor Problem Calculator")
+st.markdown("# Newsvendor Problem Calculator")
 st.markdown("Enter your parameters below to calculate the optimal order quantity.")
 st.divider()
- 
-# ── Inputs ─────────────────────────────────────────────────────────────────────
-st.markdown("## Parameters")
+st.markdown("### Input Parameters:")
  
 col1, col2, col3 = st.columns(3)
 with col1:
-    P = st.number_input("Selling Price ($)", min_value=0.01, value=1.50, step=0.01)
-    mean = st.number_input("Average Daily Demand", min_value=1, value=100, step=1)
+    P = st.number_input("Selling Price ($)", min_value=0.01, value=None)
+    mean = st.number_input("Average Daily Demand (Units)", min_value=1, value=None)
 with col2:
-    C = st.number_input("Purchase Cost ($)", min_value=0.01, value=0.75, step=0.01)
-    std = st.number_input("Std Deviation of Demand", min_value=1, value=25, step=1)
+    C = st.number_input("Purchase Cost ($)", min_value=0.01, value=None)
+    std = st.number_input("Standard Deviation of Demand", min_value=0, value=None)
 with col3:
-    S = st.number_input("Salvage Value ($)", min_value=0.00, value=0.10, step=0.01)
-    trials = st.number_input("Monte Carlo Trials", min_value=100, value=100000, step=1000)
- 
-st.divider()
- 
+    S = st.number_input("Salvage Value ($)", min_value=0.00, value=None)
+    st.button("Calculate", type="primary")
+
+if any(v is None for v in [P, C, S, mean, std, trials]):
+    st.warning("Please fill in all parameters above.")
+    st.stop()
 if P <= C:
     st.error("Selling price must be greater than purchase cost.")
     st.stop()
 if S >= C:
     st.warning("Salvage value should be less than purchase cost.")
- 
-# ── Calculate ──────────────────────────────────────────────────────────────────
-if st.button("Calculate", type="primary"):
- 
-    # Analytical Q*
-    overage  = C - S
-    underage = P - C
-    cr       = underage / (underage + overage)
-    Qstar    = round(norm.ppf(cr, mean, std))
- 
-    # Monte Carlo Q*
-    np.random.seed(42)
-    qs = range(0, 200, 1)
+if st.button("Calculate"):
+ #empirical q star   
+ over = C-S
+    under = P-C
+    Crit_ratio=under/(under+over)
+    Qstar=round(norm.ppf(Crit_ratio,mean,std))
+   
+  #Monte Carlo q star
+    np.random.seed(50)
+    trials = 1000000
+    qs = range(0, 2*mean, 1)
     myprofit = []
     for q in qs:
         demand = np.random.normal(mean, std, trials).clip(0)
@@ -50,8 +47,7 @@ if st.button("Calculate", type="primary"):
         myprofit.append(profit.mean())
     mc_qstar = list(qs)[myprofit.index(max(myprofit))]
  
-    # ── Results ────────────────────────────────────────────────────────────────
-    st.markdown("## Results")
+    st.markdown("### Results")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Critical Ratio", f"{cr:.4f}")
