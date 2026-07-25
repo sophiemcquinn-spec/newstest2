@@ -31,7 +31,7 @@ if S >= C:
     st.warning("Salvage value should be less than purchase cost.")
 if st.button("Calculate"):
  #empirical q star   
- over = C-S
+    over = C-S
     under = P-C
     Crit_ratio=under/(under+over)
     Qstar=round(norm.ppf(Crit_ratio,mean,std))
