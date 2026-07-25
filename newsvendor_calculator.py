@@ -52,12 +52,10 @@ if calc:
     mc_qstar = list(qs)[myprofit.index(max(myprofit))]
  
     st.markdown("### Results")
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
-        st.metric("Critical Ratio", f"{Crit_ratio:.4f}")
-    with col2:
         st.metric("Analytical Q*", f"{Qstar} units")
-    with col3:
+    with col2:
         st.metric("Monte Carlo Q*", f"{mc_qstar} units")
  
     st.divider()
@@ -67,7 +65,7 @@ if calc:
     st.markdown(f"""
 $$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {cr:.4f}$$
  
-$$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(cr):.3f} \\times {std} = {Qstar}$$
+$$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(Crit_ratio):.3f} \\times {std} = {Qstar}$$
 """)
  
     st.divider()
