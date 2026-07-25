@@ -63,7 +63,7 @@ if calc:
     # ── Formula ────────────────────────────────────────────────────────────────
     st.markdown("## The Math")
     st.markdown(f"""
-$$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {cr:.4f}$$
+$$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {Crit_ratio:.4f}$$
  
 $$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(Crit_ratio):.3f} \\times {std} = {Qstar}$$
 """)
