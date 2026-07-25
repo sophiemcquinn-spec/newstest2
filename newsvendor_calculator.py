@@ -69,9 +69,10 @@ $$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(Crit_ratio):.3f} \\t
     st.divider()
     st.markdown("### Monte Carlo Simulation")
  
-    fig = go.Figure()
-    fig.add_scatter(x=list(qs),y=myprofit,mode='lines')
-    fig.add_vline(x=mc_qstar, line_dash='dash', line_color='red', annotation_text=f'Simulated Q*={mc_qstar}')
-    fig.update_layout(title=f'Expected Profit vs. Order Quantity over 1,000,000 trials)',xaxis_title='Order Quantity',yaxis_title='Expected Profit ($)')
+    plot = go.Figure()
+    plot.add_scatter(x=list(qs),y=myprofit,mode='lines')
+    plot.add_vline(x=mc_qstar, line_dash='dash', line_color='red', annotation_text=f'Simulated Q*={mc_qstar}')
+    plot.update_layout(title=f'Expected Profit vs. Order Quantity over 1,000,000 trials)',xaxis_title='Order Quantity',yaxis_title='Expected Profit ($)')
+    plot.show()
 
     st.success(f'The Monte Carlo and analytical solutions differ by {abs(mc_qstar - Qstar)} units.')
