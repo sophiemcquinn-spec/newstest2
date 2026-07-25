@@ -72,7 +72,7 @@ $$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(Crit_ratio):.3f} \\t
     plot = go.Figure()
     plot.add_scatter(x=list(qs),y=myprofit,mode='lines')
     plot.add_vline(x=mc_qstar, line_dash='dash', line_color='red', annotation_text=f'Simulated Q*={mc_qstar}')
-    plot.update_layout(title=f'Expected Profit vs. Order Quantity over 1,000,000 trials)',xaxis_title='Order Quantity',yaxis_title='Expected Profit ($)')
-    plot.show()
+    plot.update_layout(title=f'Expected Profit vs. Order Quantity over 1,000,000 trials',xaxis_title='Order Quantity',yaxis_title='Expected Profit ($)')
+    st.plotly_chart(plot, use_container_width=True)
 
     st.success(f'The Monte Carlo and analytical solutions differ by {abs(mc_qstar - Qstar)} units.')
