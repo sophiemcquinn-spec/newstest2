@@ -21,14 +21,14 @@ with col3:
     S = st.number_input("Salvage Value ($)", min_value=0.00, value=None)
     st.button("Calculate", type="primary")
 
-if any(v is None for v in [P, C, S, mean, std, trials]):
-    st.warning("Please fill in all parameters above.")
+if any(x is None for x in [P, C, S, mean, std]):
+    st.warning("Do not leave any parameters blank")
     st.stop()
 if P <= C:
-    st.error("Selling price must be greater than purchase cost.")
+    st.error("Selling price must be greater than purchase cost")
     st.stop()
 if S >= C:
-    st.warning("Salvage value should be less than purchase cost.")
+    st.warning("Salvage value must be less than purchase cost")
 if st.button("Calculate"):
  #empirical q star   
     over = C-S
