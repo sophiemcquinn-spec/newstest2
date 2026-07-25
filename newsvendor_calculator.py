@@ -43,7 +43,7 @@ if calc:
   #Monte Carlo q star
     np.random.seed(50)
     trials = 1000000
-    qs = range(0, 2*mean, 1)
+    qs = range(0, 2*int(mean), 1)
     myprofit = []
     for q in qs:
         demand = np.random.normal(mean, std, trials).clip(0)
