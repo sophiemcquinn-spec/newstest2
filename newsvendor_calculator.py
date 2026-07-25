@@ -9,18 +9,20 @@ st.markdown("# Newsvendor Problem Calculator")
 st.markdown("Enter your parameters below to calculate the optimal order quantity.")
 st.divider()
 st.markdown("### Input Parameters:")
- 
+
+#asking for inputs
 col1, col2, col3 = st.columns(3)
 with col1:
-    P = st.number_input("Selling Price ($)", min_value=0.01, value=None)
-    mean = st.number_input("Average Daily Demand (Units)", min_value=1, value=None)
+    P = st.number_input("Selling Price ($)", value=None)
+    mean = st.number_input("Average Daily Demand (Units)", value=None)
 with col2:
-    C = st.number_input("Purchase Cost ($)", min_value=0.01, value=None)
-    std = st.number_input("Standard Deviation of Demand", min_value=0, value=None)
+    C = st.number_input("Purchase Cost ($)", value=None)
+    std = st.number_input("Standard Deviation of Demand", value=None)
 with col3:
-    S = st.number_input("Salvage Value ($)", min_value=0.00, value=None)
-    st.button("Calculate", type="primary")
+    S = st.number_input("Salvage Value ($)", value=None)
+    calc = st.button("Calculate", type="primary")
 
+#handling some edge cases
 if any(x is None for x in [P, C, S, mean, std]):
     st.warning("Do not leave any parameters blank")
     st.stop()
@@ -29,7 +31,9 @@ if P <= C:
     st.stop()
 if S >= C:
     st.warning("Salvage value must be less than purchase cost")
-if st.button("Calculate"):
+
+#performing the calculation
+if calc:
  #empirical q star   
     over = C-S
     under = P-C
@@ -50,7 +54,7 @@ if st.button("Calculate"):
     st.markdown("### Results")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Critical Ratio", f"{cr:.4f}")
+        st.metric("Critical Ratio", f"{Crit-ratio:.4f}")
     with col2:
         st.metric("Analytical Q*", f"{Qstar} units")
     with col3:
