@@ -2,114 +2,107 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import norm
-
+ 
 st.set_page_config(page_title="Newsvendor Calculator", layout="centered")
-
+ 
 st.markdown("# 📰 Newsvendor Problem Calculator")
-st.markdown("Enter your problem parameters below to calculate the optimal order quantity.")
+st.markdown("Enter your parameters below to calculate the optimal order quantity.")
 st.divider()
-
-# ── Parameter Inputs ───────────────────────────────────────────────────────────
+ 
+# ── Inputs ─────────────────────────────────────────────────────────────────────
 st.markdown("## Parameters")
-
+ 
 col1, col2, col3 = st.columns(3)
 with col1:
     P = st.number_input("Selling Price ($)", min_value=0.01, value=1.50, step=0.01)
-    mu = st.number_input("Average Daily Demand", min_value=1, value=100, step=1)
+    mean = st.number_input("Average Daily Demand", min_value=1, value=100, step=1)
 with col2:
     C = st.number_input("Purchase Cost ($)", min_value=0.01, value=0.75, step=0.01)
-    sigma = st.number_input("Std Deviation of Demand", min_value=1, value=25, step=1)
+    std = st.number_input("Std Deviation of Demand", min_value=1, value=25, step=1)
 with col3:
     S = st.number_input("Salvage Value ($)", min_value=0.00, value=0.10, step=0.01)
-    trials = st.selectbox("Monte Carlo Trials", [10000, 50000, 100000], index=0)
-
+    trials = st.number_input("Monte Carlo Trials", min_value=100, value=100000, step=1000)
+ 
 st.divider()
-
-# ── Validation ─────────────────────────────────────────────────────────────────
+ 
 if P <= C:
     st.error("Selling price must be greater than purchase cost.")
     st.stop()
 if S >= C:
-    st.warning("Salvage value is unusually high — are you sure it exceeds purchase cost?")
-
-# ── Calculate Button ───────────────────────────────────────────────────────────
-if st.button("Calculate Optimal Order Quantity", type="primary"):
-
-    # Analytical solution
+    st.warning("Salvage value should be less than purchase cost.")
+ 
+# ── Calculate ──────────────────────────────────────────────────────────────────
+if st.button("Calculate", type="primary"):
+ 
+    # Analytical Q*
     overage  = C - S
     underage = P - C
-    CR       = underage / (underage + overage)
-    Q_analytical = round(norm.ppf(CR, mu, sigma))
-
-    # Monte Carlo solution
-    qs = range(max(1, mu - 4*sigma), mu + 4*sigma, 1)
-    mc_profits = []
+    cr       = underage / (underage + overage)
+    Qstar    = round(norm.ppf(cr, mean, std))
+ 
+    # Monte Carlo Q*
+    np.random.seed(42)
+    qs = range(0, 200, 1)
+    myprofit = []
     for q in qs:
-        demands = np.random.normal(mu, sigma, trials).clip(0)
-        profits = np.minimum(demands, q)*P + np.maximum(0, q-demands)*S - q*C
-        mc_profits.append(profits.mean())
-    Q_mc = list(qs)[mc_profits.index(max(mc_profits))]
-    max_profit = max(mc_profits)
-
+        demand = np.random.normal(mean, std, trials).clip(0)
+        profit = np.minimum(demand, q)*P + np.maximum(0, q-demand)*S - q*C
+        myprofit.append(profit.mean())
+    mc_qstar = list(qs)[myprofit.index(max(myprofit))]
+ 
     # ── Results ────────────────────────────────────────────────────────────────
     st.markdown("## Results")
-
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Critical Ratio", f"{CR:.4f}")
+        st.metric("Critical Ratio", f"{cr:.4f}")
     with col2:
-        st.metric("Analytical Q*", f"{Q_analytical} units")
+        st.metric("Analytical Q*", f"{Qstar} units")
     with col3:
-        st.metric("Monte Carlo Q*", f"{Q_mc} units")
-
+        st.metric("Monte Carlo Q*", f"{mc_qstar} units")
+ 
     st.divider()
-
-    # ── Explanation ────────────────────────────────────────────────────────────
+ 
+    # ── Formula ────────────────────────────────────────────────────────────────
     st.markdown("## The Math")
     st.markdown(f"""
-The **Critical Ratio** tells us what fraction of demand days we should be able to cover:
-
-$$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {CR:.4f}$$
-
-This means we should stock enough to meet demand on **{CR*100:.1f}%** of days.
-
-Using the inverse normal CDF:
-
-$$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mu} + {norm.ppf(CR):.3f} \\times {sigma} = {Q_analytical}$$
+$$CR = \\frac{{p - c}}{{p - s}} = \\frac{{{P} - {C}}}{{{P} - {S}}} = {cr:.4f}$$
+ 
+$$Q^* = \\mu + z_{{CR}} \\cdot \\sigma = {mean} + {norm.ppf(cr):.3f} \\times {std} = {Qstar}$$
 """)
-
+ 
     st.divider()
-
-    # ── Monte Carlo Chart ──────────────────────────────────────────────────────
-    st.markdown("## Monte Carlo Simulation")
-    st.markdown(f"Expected daily profit simulated across **{trials:,} trials** for each possible order quantity:")
-
+ 
+    # ── Plot ───────────────────────────────────────────────────────────────────
+    st.markdown("## Expected Profit vs. Order Quantity")
+ 
     fig = go.Figure()
     fig.add_scatter(
-        x=list(qs), y=mc_profits,
-        mode="lines", name="Expected Profit",
-        line=dict(color="#1f77b4", width=2)
+        x=list(qs),
+        y=myprofit,
+        mode='lines',
+        name='Expected Profit',
+        line=dict(color='steelblue', width=2)
     )
     fig.add_vline(
-        x=Q_mc, line_dash="dash", line_color="#2ca02c",
-        annotation_text=f"MC Q*={Q_mc}",
-        annotation_position="top right"
+        x=mc_qstar, line_dash='dash', line_color='red',
+        annotation_text=f'MC Q*={mc_qstar}',
+        annotation_position='top left'
     )
     fig.add_vline(
-        x=Q_analytical, line_dash="dot", line_color="#ff7f0e",
-        annotation_text=f"Analytical Q*={Q_analytical}",
-        annotation_position="top left"
+        x=Qstar, line_dash='dash', line_color='green',
+        annotation_text=f'Analytical Q*={Qstar}',
+        annotation_position='top right'
     )
     fig.update_layout(
-        title=f"Expected Daily Profit vs. Order Quantity ({trials:,} trials)",
-        xaxis_title="Order Quantity",
-        yaxis_title="Expected Daily Profit ($)",
-        plot_bgcolor="white",
-        height=400,
-        legend=dict(orientation="h", y=1.12)
+        title=f'Expected Profit vs. Order Quantity ({trials:,} trials)',
+        xaxis_title='Order Quantity',
+        yaxis_title='Expected Profit ($)',
+        plot_bgcolor='white',
+        height=450
     )
-    fig.update_yaxes(gridcolor="#eee", tickprefix="$")
-    fig.update_xaxes(gridcolor="#eee")
+    fig.update_yaxes(gridcolor='#eee', tickprefix='$')
+    fig.update_xaxes(gridcolor='#eee')
     st.plotly_chart(fig, use_container_width=True)
-
-    st.success(f"At the optimal order quantity of **{Q_mc} units**, expected daily profit is **${max_profit:.2f}**.")
+ 
+    st.success(f"At Q*={mc_qstar}, the Monte Carlo and analytical solutions "
+               f"{'agree.' if mc_qstar == Qstar else f'differ by {abs(mc_qstar - Qstar)} unit(s).'}")
