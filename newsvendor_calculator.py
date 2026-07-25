@@ -54,7 +54,7 @@ if calc:
     st.markdown("### Results")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.metric("Critical Ratio", f"{Crit-ratio:.4f}")
+        st.metric("Critical Ratio", f"{Crit_ratio:.4f}")
     with col2:
         st.metric("Analytical Q*", f"{Qstar} units")
     with col3:
